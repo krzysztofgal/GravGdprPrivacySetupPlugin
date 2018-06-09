@@ -1,0 +1,18 @@
+enabled: false
+privacy_page_route: '/gdpr_privacy_info_page'
+
+inputPrefix: 'gdpr_'
+modalWindowId: 'privacyModalWindow'
+
+denyRedirectionTarget: 'http://google.com'
+
+privacySettingsBtnClass: 'gdpr-privacy-open-settings'
+
+consentButtonText: 'I accept privacy policy'
+consentButtonClass: 'tingle-btn tingle-btn--primary tingle-btn--pull-right'
+
+denyButtonText: 'I don`t accept site policy'
+denyButtonClass: 'tingle-btn tingle-btn--danger'
+
+deferInfoPopupTime: 15
+consentExpiresTime: 30
