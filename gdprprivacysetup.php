@@ -22,7 +22,7 @@ use Grav\Common\Plugin;
  */
 class GdprPrivacySetupPlugin extends Plugin
 {
-    protected $current_route;
+    private $current_route;
     private $privacy_info_route;
     private $csp;
     private $cookieName;
@@ -40,6 +40,10 @@ class GdprPrivacySetupPlugin extends Plugin
     {
         if ($this->isAdmin()) {
             $this->active = false;
+
+            $this->config->set('plugins.gdprprivacysetup.privacySHA1', self::getPrivacyInfoSha1());
+            $this->saveConfig($this->name);
+
             return;
         }
 
@@ -54,7 +58,7 @@ class GdprPrivacySetupPlugin extends Plugin
             //set hashed cookie name from information page, to know if user should accept changed policy
             if (!$this->config->get('plugins.gdprprivacysetup.privacySHA1')) {
                 $this->config->set('plugins.gdprprivacysetup.privacySHA1', self::getPrivacyInfoSha1());
-                //todo: save now config to file
+                $this->saveConfig($this->name);
             }
 
             $this->cookieName = 'consent_' . $this->config->get('plugins.gdprprivacysetup.privacySHA1');
@@ -104,9 +108,7 @@ class GdprPrivacySetupPlugin extends Plugin
     {
         /** @var Uri $uri */
         $uri = $this->grav['uri'];
-
         $this->current_route = $uri->path();
-
 
         /**
          * @var $pages Pages;

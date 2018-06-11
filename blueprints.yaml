@@ -1,5 +1,5 @@
 name: GDPR Privacy Setup
-version: 0.0.1
+version: 0.0.2
 description: "Manage CSP (Content Security Policy) based on visitor privacy consents"
 icon: code
 author:
@@ -7,10 +7,8 @@ author:
   email: dev@krzysztofgal.pl
   url: http://krzysztofgal.pl
 homepage: https://github.com/krzysztofgal/GravGdprPrivacySetupPlugin
-demo:
 keywords: GDPR, CSP, Privacy
-bugs:
-license:
+license: MIT
 
 dependencies:
     - { name: grav, version: '~1.1' }
@@ -65,6 +63,7 @@ form:
               type: text
               label: Consent Cookie expire time (days)
               size: x-small
+              help: Cookie is refreshing by this time setting, on every user page visit
               validate:
                 type: number
                 min: 0
@@ -94,11 +93,6 @@ form:
             privacyInfo:
               type: editor
               label: Privacy Information with optional checkboxes
-
-            privacySHA1:
-              type: text
-              data-default@: '\Grav\Plugin\GdprPrivacySetupPlugin::getPrivacyInfoSha1'
-
 
         csp:
           type: tab
