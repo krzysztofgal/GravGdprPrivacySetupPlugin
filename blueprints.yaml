@@ -1,13 +1,14 @@
 name: GDPR Privacy Setup
 version: 0.0.2
 description: "Manage CSP (Content Security Policy) based on visitor privacy consents"
-icon: code
+icon: shield
 author:
   name: Krzysztof Gał
   email: dev@krzysztofgal.pl
   url: http://krzysztofgal.pl
 homepage: https://github.com/krzysztofgal/GravGdprPrivacySetupPlugin
-keywords: GDPR, CSP, Privacy
+bugs: https://github.com/krzysztofgal/GravGdprPrivacySetupPlugin/issues
+keywords: GDPR, CSP, Privacy, Popup
 license: MIT
 
 dependencies:
@@ -49,6 +50,15 @@ form:
             denyRedirectionTarget:
               type: text
               label: Url to redirect user if deny any consent
+              help: Redirect is performed to given url if there is no referrer
+
+            inputPrefix:
+              type: text
+              label: Input prefix
+
+            privacySettingsBtnClass:
+              type: text
+              label: Class for buttons opening privacy consent modal
 
             deferInfoPopupTime:
               type: text
@@ -63,7 +73,7 @@ form:
               type: text
               label: Consent Cookie expire time (days)
               size: x-small
-              help: Cookie is refreshing by this time setting, on every user page visit
+              help: Cookie is refreshing by this time setting on every user page visit
               validate:
                 type: number
                 min: 0
