@@ -1,5 +1,5 @@
 name: GDPR Privacy Setup
-version: 0.0.2
+version: 0.0.3
 description: "Manage CSP (Content Security Policy) based on visitor privacy consents"
 icon: shield
 author:
