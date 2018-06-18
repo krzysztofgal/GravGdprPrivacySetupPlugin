@@ -1,7 +1,7 @@
 # GravGdprPrivacySetupPlugin
 Plugin for Grav CMS - It allows to show up customisable privacy consents for visitors (as one of techniques for comply with GDPR), and manage content security policy (not only) meta tag based on visitor settings.
 
-Plugin does`nt require jQuery. Plugin uses and includes following scripts:
+Plugin doesn`t require jQuery. Plugin uses and includes following scripts:
 tingle.js - MIT [https://github.com/robinparisi/tingle](https://github.com/robinparisi/tingle)  
 js-cookie - MIT [https://github.com/js-cookie/js-cookie](https://github.com/js-cookie/js-cookie)
 
@@ -47,8 +47,8 @@ Eg. if You have consent name `webfonts`, in privacy information add:
 <label for="gdpr_webfonts">Some Web Stored Fonts</label>
 ```
 
-Important part is `id="gdpr_webfonts"`, `gdpr_` is prefix which can be defined in plugin settings and `webfons` is consent name related to name defined in plugin settings.
+Important part is `id="gdpr_webfonts"`, `gdpr_` is prefix which can be defined in plugin settings and `webfonts` is consent name related to name defined in plugin settings.
 
-You should also add `checked` and `disabled` attributes for checkboxes that should be enabled by default or visitor should\`nt be able to reject some consent (see `site` consent on default configuration). 
+You should also add `checked` and `disabled` attributes for checkboxes that should be enabled by default or visitor shouldn\`t be able to reject some consent (see `site` consent on default configuration). 
 
 P.S. Sorry for my english :)

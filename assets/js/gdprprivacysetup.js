@@ -6,9 +6,10 @@
  * Released under the MIT license
  */
 var gdprPrivacySetupPlugin = (function () {
-    var fn = {};
-    var settings = {};
-    var privacySettings = {};
+    var fn = {},
+        settings = {},
+        privacySettings = {},
+        openPopup = 0;
 
     /**
      * Store callbacks registered by onAllowed function
@@ -29,6 +30,8 @@ var gdprPrivacySetupPlugin = (function () {
         denyRedirectionTarget: '',
         deferInfoPopup: 0,
         consentExpires: 0,
+        tempCookieName: 'noConsent',
+        lastConsentVersion: '',
         userConsent: {}
     };
 
@@ -49,9 +52,16 @@ var gdprPrivacySetupPlugin = (function () {
     };
 
     function initReal() {
-        if (!Cookies.get(settings.cookieName)) {
+        if (shouldPopupShow()) {
+            openPopup = 1;
+        } else {
+            //refresh cookie on visit
+            Cookies.set(settings.cookieName, JSON.stringify(privacySettings), { expires: settings.consentExpires });
+        }
+
+        if (openPopup === 1) {
             // open popup immediately or defer
-            if (settings.deferInfoPopup <= 0) {
+            if (settings.deferInfoPopup <= 0 || notGivenAnyConsentAfterVisit()) {
                 openPrivacyInfo();
             } else {
                 var deferOpenInfo = function() {
@@ -61,9 +71,6 @@ var gdprPrivacySetupPlugin = (function () {
 
                 window.addEventListener('scroll', deferOpenInfo);
             }
-        } else {
-            //refresh cookie on visit
-            Cookies.set(settings.cookieName, JSON.stringify(privacySettings), { expires: settings.consentExpires });
         }
 
         executePrivacySetupCallbacks();
@@ -77,6 +84,26 @@ var gdprPrivacySetupPlugin = (function () {
                 openPrivacyInfo();
             };
         }
+    }
+
+    function shouldPopupShow() {
+        return (
+            noConsent() ||
+            notGivenAnyConsentAfterVisit() ||
+            consentVersionNotMatch()
+        );
+    }
+
+    function noConsent() {
+        return !Cookies.get(settings.cookieName);
+    }
+
+    function notGivenAnyConsentAfterVisit() {
+        return Cookies.get(settings.tempCookieName);
+    }
+
+    function consentVersionNotMatch() {
+        return settings.lastConsentVersion !== privacySettings.version;
     }
 
     function openPrivacyInfo() {
@@ -100,11 +127,14 @@ var gdprPrivacySetupPlugin = (function () {
                     }
                 };
                 xhr.send(null);
+
+                Cookies.set(settings.tempCookieName, 0, { expires: 1 });
             }
         });
 
         modal.addFooterBtn(settings.denyConsent, settings.denyBtnClass, function() {
             Cookies.remove(settings.cookieName);
+            Cookies.remove(settings.tempCookieName);
             //kick out user from page to referer or redirection target
             var isReferrerSameDomain = document.referrer.indexOf(location.protocol + "//" + location.host) === 0;
             if (!isReferrerSameDomain && document.referrer !== '') {
@@ -115,6 +145,7 @@ var gdprPrivacySetupPlugin = (function () {
         });
 
         modal.addFooterBtn(settings.setupConsent, settings.acceptBtnClass, function() {
+            Cookies.remove(settings.tempCookieName);
             setupVisitorPrivacy();
             modal.close();
         });
@@ -144,7 +175,9 @@ var gdprPrivacySetupPlugin = (function () {
      */
     function setupVisitorPrivacy() {
         try {
-            var privacySetup = {};
+            var privacySetup = {
+                version: settings.lastConsentVersion
+            };
             for (var consent in privacySettings) {
                 if (privacySettings.hasOwnProperty(consent)) {
                     var checkbox = document.getElementById(settings.inputPrefix + consent);

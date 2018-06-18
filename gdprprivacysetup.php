@@ -10,7 +10,6 @@
 
 namespace Grav\Plugin;
 
-use Grav\Common\Grav;
 use Grav\Common\Page\Page;
 use Grav\Common\Page\Pages;
 use Grav\Common\Uri;
@@ -41,7 +40,10 @@ class GdprPrivacySetupPlugin extends Plugin
         if ($this->isAdmin()) {
             $this->active = false;
 
-            $this->config->set('plugins.gdprprivacysetup.privacySHA1', self::getPrivacyInfoSha1());
+            $this->config->set(
+                'plugins.gdprprivacysetup.privacySHA1',
+                sha1($this->config->get('plugins.gdprprivacysetup.privacyInfo'))
+            );
             $this->saveConfig($this->name);
 
             return;
@@ -57,14 +59,17 @@ class GdprPrivacySetupPlugin extends Plugin
 
             //set hashed cookie name from information page, to know if user should accept changed policy
             if (!$this->config->get('plugins.gdprprivacysetup.privacySHA1')) {
-                $this->config->set('plugins.gdprprivacysetup.privacySHA1', self::getPrivacyInfoSha1());
+                $this->config->set(
+                    'plugins.gdprprivacysetup.privacySHA1',
+                    sha1($this->config->get('plugins.gdprprivacysetup.privacyInfo'))
+                );
                 $this->saveConfig($this->name);
             }
 
-            $this->cookieName = 'consent_' . $this->config->get('plugins.gdprprivacysetup.privacySHA1');
+            $this->cookieName = 'PrivacyConsent';
 
             //try to get saved user consent
-            $this->getUserConsent();
+            $this->userConsent = $this->getUserConsent();
 
             $this->enable([
                 'onPagesInitialized' => ['onPagesInitialized', 1000],
@@ -73,19 +78,19 @@ class GdprPrivacySetupPlugin extends Plugin
         }
     }
 
-    /**
-     * Get saved user consent or get default settings
+    /** Get saved user consent or get default settings
+     * @return array|mixed
      */
     private function getUserConsent()
     {
         if (isset($_COOKIE[$this->cookieName])) {
             try {
-                $this->userConsent = json_decode($_COOKIE[$this->cookieName], true);
+                 return json_decode($_COOKIE[$this->cookieName], true);
             } catch (\Exception $e) {
-                $this->userConsent = $this->getDefaultConsents();
+                return $this->getDefaultConsents();
             }
         } else {
-            $this->userConsent = $this->getDefaultConsents();
+            return $this->getDefaultConsents();
         }
     }
 
@@ -124,12 +129,14 @@ class GdprPrivacySetupPlugin extends Plugin
             $pages->addPage($page, $this->current_route);
         }
 
-        $page->metadata([
-            'gdprCSP' => [
-                'http_equiv' => "Content-Security-Policy",
-                'content' => $this->getCspRules()
-            ],
-        ]);
+        if ($page) {
+            $page->metadata([
+                'gdprCSP' => [
+                    'http_equiv' => "Content-Security-Policy",
+                    'content' => $this->getCspRules()
+                ],
+            ]);
+        }
     }
 
     /** Make CSP meta tag content
@@ -187,6 +194,8 @@ class GdprPrivacySetupPlugin extends Plugin
 
         $cookieName = $this->cookieName;
 
+        $lastConsentVersion = $this->config->get('plugins.gdprprivacysetup.privacySHA1');
+
         try {
             $userConsent = json_encode($this->userConsent);
         } catch (\Exception $e) {
@@ -206,6 +215,8 @@ class GdprPrivacySetupPlugin extends Plugin
             denyRedirectionTarget: \"${denyRedirection}\",
             deferInfoPopup: ${deferInfoPopupTime},
             consentExpires: ${consentExpires},
+            tempCookieName: 'noConsent',
+            lastConsentVersion: \"${lastConsentVersion}\",
             userConsent: ${userConsent}
         };
         gdprPrivacySetupPlugin.init(gdprPrivacySetupPluginSettings);";
@@ -219,17 +230,5 @@ class GdprPrivacySetupPlugin extends Plugin
     public function onTwigLoader()
     {
         $this->grav['twig']->addPath(__DIR__ . '/templates');
-    }
-
-    /** Get sha1 hash of privacy information page, to know if visitor accepted current version of privacy policy
-     * @return string
-     */
-    public static function getPrivacyInfoSha1()
-    {
-        $grav = Grav::instance();
-
-        $config = $grav['config'];
-
-        return sha1($config->get('plugins.gdprprivacysetup.privacyInfo'));
     }
 }
