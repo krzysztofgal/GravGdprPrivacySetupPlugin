@@ -1,3 +1,12 @@
+# v0.0.4
+## 18/06/2018
+
+1. [](#new)
+    * Added Page Whitelist feature, on selected pages popup won`t be shown.
+
+1. [](#improved)
+    * Blueprint labels and help improved.
+
 # v0.0.3
 ## 18/06/2018
 

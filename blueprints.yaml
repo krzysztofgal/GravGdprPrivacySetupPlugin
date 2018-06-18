@@ -1,6 +1,6 @@
 name: GDPR Privacy Setup
-version: 0.0.3
-description: "Manage CSP (Content Security Policy) based on visitor privacy consents"
+version: 0.0.4
+description: "Show privacy information popup and manage CSP (Content Security Policy) based on visitor privacy consents"
 icon: shield
 author:
   name: Krzysztof Gał
@@ -23,7 +23,7 @@ form:
       active: 1
 
       fields:
-        plugin:
+        pluginTab:
           type: tab
           title: Plugin
 
@@ -41,29 +41,32 @@ form:
 
             privacy_page_route:
               type: text
-              label: Url for page containing privacy info and form
+              label: Url to site policy page
+              help: If page not exists, then plugin Privacy Information field will be used
 
             modalWindowId:
               type: text
-              label: Id of modal popup conetent
+              label: Modal popup content Id
 
             denyRedirectionTarget:
               type: text
-              label: Url to redirect user if deny any consent
+              label: Deny consent redirect url
               help: Redirect is performed to given url if there is no referrer
 
             inputPrefix:
               type: text
               label: Input prefix
+              help: Only inputs with this prefix will be processed
 
             privacySettingsBtnClass:
               type: text
-              label: Class for buttons opening privacy consent modal
+              label: Button Class to open popup
+              help: On any page You can put button or link to reopen popup
 
             deferInfoPopupTime:
               type: text
               label: Time to show up Privacy Information Popup (seconds)
-              help: if greater than 0, then countdown will start on window scroll
+              help: if greater than 0, then countdown will start on window scroll (on first site visit)
               size: x-small
               validate:
                 type: number
@@ -79,7 +82,7 @@ form:
                 min: 0
                 max: 365
 
-        content:
+        contentTab:
           type: tab
           title: Content
 
@@ -102,9 +105,9 @@ form:
 
             privacyInfo:
               type: editor
-              label: Privacy Information with optional checkboxes
+              label: Privacy Information
 
-        csp:
+        cspTab:
           type: tab
           title: CSP
 
@@ -119,13 +122,29 @@ form:
                   required: true
                 .policy:
                   type: text
-                  label: (Optional) Url or valid meta CSP value to allow external resources on consent
+                  label: (Optional) Url or CSP value
+                  help: Url or valid meta CSP value to allow external resources on consent
                 .default:
                   type: toggle
                   label: Default Consent State
+                  help: Consent state if visitor not give any consent yet
                   default: 0
                   validate:
                     type: bool
                   options:
                     1: Enabled
                     0: Disabled
+
+        whitelistTab:
+          type: tab
+          title: Whitelist
+
+          fields:
+            whitelistPages:
+              type: pages
+              label: Whitelisted Pages
+              help: Select pages where popup won`t be shown
+              show_modular: false
+              multiple: true
+              validate:
+                type: array

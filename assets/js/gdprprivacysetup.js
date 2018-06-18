@@ -32,6 +32,7 @@ var gdprPrivacySetupPlugin = (function () {
         consentExpires: 0,
         tempCookieName: 'noConsent',
         lastConsentVersion: '',
+        whitelist: 0,
         userConsent: {}
     };
 
@@ -54,7 +55,7 @@ var gdprPrivacySetupPlugin = (function () {
     function initReal() {
         if (shouldPopupShow()) {
             openPopup = 1;
-        } else {
+        } else if (!pageIsWhitelisted() || !noConsent()) {
             //refresh cookie on visit
             Cookies.set(settings.cookieName, JSON.stringify(privacySettings), { expires: settings.consentExpires });
         }
@@ -87,11 +88,17 @@ var gdprPrivacySetupPlugin = (function () {
     }
 
     function shouldPopupShow() {
+        if (pageIsWhitelisted()) return false;
+
         return (
             noConsent() ||
             notGivenAnyConsentAfterVisit() ||
             consentVersionNotMatch()
         );
+    }
+
+    function pageIsWhitelisted() {
+        return settings.whitelist;
     }
 
     function noConsent() {

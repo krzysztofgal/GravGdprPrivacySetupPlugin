@@ -196,6 +196,14 @@ class GdprPrivacySetupPlugin extends Plugin
 
         $lastConsentVersion = $this->config->get('plugins.gdprprivacysetup.privacySHA1');
 
+        $pagesWhitelist = $this->config->get('plugins.gdprprivacysetup.whitelistPages');
+
+        try {
+            $whitelist = in_array($this->current_route, $pagesWhitelist);
+        } catch (\Exception $e) {
+            $whitelist = false;
+        }
+
         try {
             $userConsent = json_encode($this->userConsent);
         } catch (\Exception $e) {
@@ -217,6 +225,7 @@ class GdprPrivacySetupPlugin extends Plugin
             consentExpires: ${consentExpires},
             tempCookieName: 'noConsent',
             lastConsentVersion: \"${lastConsentVersion}\",
+            whitelist: \"${whitelist}\",
             userConsent: ${userConsent}
         };
         gdprPrivacySetupPlugin.init(gdprPrivacySetupPluginSettings);";

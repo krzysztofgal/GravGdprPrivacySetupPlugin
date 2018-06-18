@@ -1,13 +1,15 @@
 # GravGdprPrivacySetupPlugin
 Plugin for Grav CMS - It allows to show up customisable privacy consents for visitors (as one of techniques for comply with GDPR), and manage content security policy (not only) meta tag based on visitor settings.
 
-Plugin doesn`t require jQuery. Plugin uses and includes following scripts:
+Plugin doesn`t require jQuery. Plugin uses and includes following scripts:  
 tingle.js - MIT [https://github.com/robinparisi/tingle](https://github.com/robinparisi/tingle)  
 js-cookie - MIT [https://github.com/js-cookie/js-cookie](https://github.com/js-cookie/js-cookie)
 
 Plugin shows up Modal for site visitor.
 
 ![screenshot_20180613_122112](https://user-images.githubusercontent.com/10743264/41347647-94d206f2-6f0a-11e8-934c-7feb934a3761.png)
+
+Intention of this plugin is to show popup to visitor with short straightfoward information about site policy and give ability for user to setup his privacy settings. This information should have link to page containing full version of site policy.
 
 #### Features.
 
@@ -16,7 +18,8 @@ Plugin shows up Modal for site visitor.
 * accept and deny buttons can be customised with content and button classes,
 * modal can show up immediately on page load, or can be deferred by given time after user scroll page, so visitor have time to know some content of page, before asking for privacy consents,
 * after changing privacy information content, modal will show up for all visitors, even when they accepted previous version,
-* you can add button on any page to show up modal for user which want to change privacy consents.
+* You can add button on any page to show up modal for user which want to change privacy consents,
+* You can add whitelisted pages, where popup won`t be shown (eg. page with site policy).
 
 #### Privacy management is done by to ways.
 
