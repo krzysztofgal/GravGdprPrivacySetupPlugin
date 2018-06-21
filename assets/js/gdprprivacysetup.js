@@ -128,6 +128,8 @@ var gdprPrivacySetupPlugin = (function () {
                         modalContent = document.getElementById(settings.modalContentId);
                         modalContent.innerHTML = xhr.responseText;
                         getVisitorPrivacySettings();
+
+                        modal.checkOverflow();
                     }
                     else {
                         alert('Request failed.  Returned status of ' + xhr.status);

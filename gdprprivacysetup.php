@@ -240,4 +240,9 @@ class GdprPrivacySetupPlugin extends Plugin
     {
         $this->grav['twig']->addPath(__DIR__ . '/templates');
     }
+
+    private function getConf($field)
+    {
+
+    }
 }
