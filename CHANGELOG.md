@@ -1,4 +1,11 @@
-# v0.0.5
+# v0.0.6
+## 06/29/2018
+
+1. [](#improved)
+    * PHP 5 compatibility
+    * Some code refactor
+    * Moved templates to subdirectory templates/partials/gdpr_privacy
+
 ## 06/21/2018
 
 1. [](#improved)

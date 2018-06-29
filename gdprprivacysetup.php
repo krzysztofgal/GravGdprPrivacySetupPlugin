@@ -42,26 +42,26 @@ class GdprPrivacySetupPlugin extends Plugin
 
             $this->config->set(
                 'plugins.gdprprivacysetup.privacySHA1',
-                sha1($this->config->get('plugins.gdprprivacysetup.privacyInfo'))
+                sha1($this->getConf('privacyInfo'))
             );
             $this->saveConfig($this->name);
 
             return;
         }
 
-        $this->active = $this->config->get('plugins.gdprprivacysetup.enabled');
+        $this->active = $this->getConf('enabled');
 
         if ($this->active) {
-            $this->privacy_info_route = $this->config->get('plugins.gdprprivacysetup.privacy_page_route');
+            $this->privacy_info_route = $this->getConf('privacy_page_route');
 
             //get content security policies setup
-            $this->csp = $this->config->get('plugins.gdprprivacysetup.consentPolicyList');
+            $this->csp = $this->getConf('consentPolicyList');
 
             //set hashed cookie name from information page, to know if user should accept changed policy
-            if (!$this->config->get('plugins.gdprprivacysetup.privacySHA1')) {
+            if (!$this->getConf('privacySHA1')) {
                 $this->config->set(
                     'plugins.gdprprivacysetup.privacySHA1',
-                    sha1($this->config->get('plugins.gdprprivacysetup.privacyInfo'))
+                    sha1($this->getConf('privacyInfo'))
                 );
                 $this->saveConfig($this->name);
             }
@@ -151,7 +151,7 @@ class GdprPrivacySetupPlugin extends Plugin
             }
         }
 
-        return $policy . ';';
+        return trim($policy) . ';';
     }
 
     /**
@@ -162,7 +162,7 @@ class GdprPrivacySetupPlugin extends Plugin
     {
         if (!isset($this->userConsent[$consent])) {
             //fallback for new consents, that are not in cookie
-            $this->userConsent[$consent] = $this->csp[$consent] ?? false;
+            $this->userConsent[$consent] = isset($this->csp[$consent]) ? $this->csp[$consent] : false;
         }
 
         return (bool) $this->userConsent[$consent];
@@ -175,62 +175,39 @@ class GdprPrivacySetupPlugin extends Plugin
         $this->grav['assets']->addJs('plugin://gdprprivacysetup/assets/js/tingle.min.js');
         $this->grav['assets']->addJs('plugin://gdprprivacysetup/assets/js/gdprprivacysetup.js');
 
-        $privacyPage = $this->privacy_info_route;
-        $consentButtonText = $this->config->get('plugins.gdprprivacysetup.consentButtonText');
-        $consentButtonClass = $this->config->get('plugins.gdprprivacysetup.consentButtonClass');
+        $setup = [
+            'privacyPage' => $this->privacy_info_route,
+            'consentButtonText' => $this->getConf('consentButtonText'),
+            'consentButtonClass' => $this->getConf('consentButtonClass'),
+            'denyButtonText' => $this->getConf('denyButtonText'),
+            'denyButtonClass' =>$this->getConf('denyButtonClass'),
+            'privacySettingsBtnClass' => $this->getConf('privacySettingsBtnClass'),
+            'inputPrefix' => $this->getConf('inputPrefix'),
+            'modalWindow' => $this->getConf('modalWindowId'),
+            'denyRedirection' => $this->getConf('denyRedirectionTarget'),
+            'deferInfoPopupTime' => $this->getConf('deferInfoPopupTime'),
+            'consentExpires' => $this->getConf('consentExpiresTime'),
+            'cookieName' => $this->cookieName,
+            'lastConsentVersion' => $this->getConf('privacySHA1')
+        ];
 
-        $denyButtonText = $this->config->get('plugins.gdprprivacysetup.denyButtonText');
-        $denyButtonClass = $this->config->get('plugins.gdprprivacysetup.denyButtonClass');
-
-        $privacySettingsBtnClass = $this->config->get('plugins.gdprprivacysetup.privacySettingsBtnClass');
-
-        $inputPrefix = $this->config->get('plugins.gdprprivacysetup.inputPrefix');
-        $modalWindow = $this->config->get('plugins.gdprprivacysetup.modalWindowId');
-
-        $denyRedirection = $this->config->get('plugins.gdprprivacysetup.denyRedirectionTarget');
-
-        $deferInfoPopupTime = $this->config->get('plugins.gdprprivacysetup.deferInfoPopupTime');
-        $consentExpires = $this->config->get('plugins.gdprprivacysetup.consentExpiresTime');
-
-        $cookieName = $this->cookieName;
-
-        $lastConsentVersion = $this->config->get('plugins.gdprprivacysetup.privacySHA1');
-
-        $pagesWhitelist = $this->config->get('plugins.gdprprivacysetup.whitelistPages');
+        $pagesWhitelist = $this->getConf('whitelistPages');
 
         try {
-            $whitelist = in_array($this->current_route, $pagesWhitelist);
+            $setup['whitelist'] = in_array($this->current_route, $pagesWhitelist);
         } catch (\Exception $e) {
-            $whitelist = false;
+            $setup['whitelist'] = false;
         }
 
         try {
-            $userConsent = json_encode($this->userConsent);
+            $setup['userConsent'] = json_encode($this->userConsent);
         } catch (\Exception $e) {
-            $userConsent = "{}";
+            $setup['userConsent'] = "{}";
         }
 
-        $init = "var gdprPrivacySetupPluginSettings = {
-            setupPage: \"${privacyPage}\",
-            setupConsent: \"${consentButtonText}\",
-            denyConsent: \"${denyButtonText}\",
-            inputPrefix: \"${inputPrefix}\",
-            modalContentId: \"${modalWindow}\",
-            cookieName: \"${cookieName}\",
-            privacySettingsButtonClass: \"${privacySettingsBtnClass}\",
-            acceptBtnClass: \"${consentButtonClass}\",
-            denyBtnClass: \"${denyButtonClass}\",
-            denyRedirectionTarget: \"${denyRedirection}\",
-            deferInfoPopup: ${deferInfoPopupTime},
-            consentExpires: ${consentExpires},
-            tempCookieName: 'noConsent',
-            lastConsentVersion: \"${lastConsentVersion}\",
-            whitelist: \"${whitelist}\",
-            userConsent: ${userConsent}
-        };
-        gdprPrivacySetupPlugin.init(gdprPrivacySetupPluginSettings);";
+        $renderedJs = $this->grav['twig']->twig->render('init_js.html.twig', ['setup' => $setup]);
 
-        $this->grav['assets']->addInlineJs($init);
+        $this->grav['assets']->addInlineJs($renderedJs);
     }
 
     /**
@@ -238,11 +215,16 @@ class GdprPrivacySetupPlugin extends Plugin
      */
     public function onTwigLoader()
     {
-        $this->grav['twig']->addPath(__DIR__ . '/templates');
+        $this->grav['twig']->addPath(__DIR__ . '/templates/partials/gdpr_privacy');
     }
 
+    /** Shorthand for get config
+     * @param $field
+     * @return mixed
+     */
     private function getConf($field)
     {
-
+        $key = 'plugins.' . $this->name . '.' . $field;
+        return $this->config->get($key);
     }
 }

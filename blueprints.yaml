@@ -1,5 +1,5 @@
 name: GDPR Privacy Setup
-version: 0.0.5
+version: 0.0.6
 description: "Show privacy information popup and manage CSP (Content Security Policy) based on visitor privacy consents"
 icon: shield
 author:
