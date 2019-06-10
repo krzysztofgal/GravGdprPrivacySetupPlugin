@@ -90,6 +90,10 @@ class GdprPrivacySetupPlugin extends Plugin
             try {
                 $optional = array_column($this->csp, 'optional', 'consent');
                 $consents = json_decode($_COOKIE[$this->cookieName], true);
+                
+                if (!$consents) {
+                    throw new \Exception('Invalid Json');
+                }
 
                 foreach ($consents as $consent => $value) {
                     if (isset($optional[$consent]) && !$optional[$consent]) {
