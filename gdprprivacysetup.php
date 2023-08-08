@@ -27,8 +27,8 @@ class GdprPrivacySetupPlugin extends Plugin
     private $cookieName;
     private $userConsent;
 
-    private const STYLE_BOTTOM_BAR = 0;
-    private const STYLE_MODAL = 1;
+    const STYLE_BOTTOM_BAR = 0;
+    const STYLE_MODAL = 1;
 
     public static function getSubscribedEvents()
     {
